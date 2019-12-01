@@ -1,5 +1,6 @@
 import hashlib
 import datetime
+import pandas as pd
 
 
 class Block:
@@ -32,13 +33,17 @@ class Block:
         key.update(str(self.previous_hash).encode('utf-8'))
         return key.hexdigest()
 
+    def summary(self):
+        return pd.DataFrame({"Block summary": [self.index, self.timestamp, self.data, self.previous_hash, self.hash]},
+                            index=["Index", "Timestamp", "Data", "Previous hash", "Hash"])
+
 
 def get_genesis_block():
     """
     Return the genesis block of a BlockChain.
 
     """
-    return Block(index=0, timestamp=datetime.datetime.utcnow(), data="Genesis", previous_hash="arbitrary")
+    return Block(index=0, timestamp=datetime.datetime.utcnow(), data="Genesis", previous_hash="0"*64)
 
 
 class BlockChain:

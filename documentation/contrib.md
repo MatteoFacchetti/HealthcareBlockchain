@@ -11,4 +11,4 @@
 
 |      |            | **December 2019**                                                                            |
 |:----:|:----------:|----------------------------------------------------------------------------------------------|
-|      |            |                                                                                              |
+| _1_  | _Sunday_   |  **Matteo** started building the code for the BlockChain. He created the file `utils/data_utils` which contains two classes: the class `Block` and the class `BlockChain` |
