@@ -8,12 +8,14 @@ class Block:
     Minimal block containing an index, a timestamp, the data to store and the previous hash.
     """
 
-    def __init__(self, index, player, name, timestamp, kind, data, previous_hash):
+    def __init__(self, index, name, player, timestamp, previous_hash, data=None, kind=None, patient=None, event=None):
         self.index = index
         self.player = player
+        self.event = event
         self.name = name
         self.timestamp = timestamp
         self.kind = kind
+        self.patient = patient
         self.data = data
         self.previous_hash = previous_hash
         self.hash = self.hashing()
@@ -32,6 +34,11 @@ class Block:
                                                    self.data, self.previous_hash, self.hash]},
                                 index=["Index", "Name", "Timestamp", "Kind", "Data", "Previous hash", "Hash"])
 
+        if self.player == "event":
+            return pd.DataFrame({"Block summary": [self.index, self.name, self.timestamp, self.patient,
+                                                   self.previous_hash, self.hash]},
+                                index=["Index", "Name", "Timestamp", "Patient", "Previous hash", "Hash"])
+
 
 class BlockChain:
     def __init__(self, player, name):
@@ -46,9 +53,8 @@ class BlockChain:
         """
         Return the genesis block of a BlockChain.
         """
-        if self.player == "patient":
-            return Block(index=0, player=self.player, name=self.name, timestamp=datetime.datetime.utcnow(),
-                         kind="Genesis", data="Genesis", previous_hash="0" * 64)
+        return Block(index=0, player=self.player, name=self.name,
+                     timestamp=datetime.datetime.utcnow(), previous_hash="0"*64)
 
     def get_chain_size(self):
         """
@@ -79,3 +85,18 @@ class BlockChain:
                 flag = False
                 print(f'Backdating at block {i}.')
         return flag
+
+
+def add_event(event, patient):
+    """
+    Add an event to the patient blockchain. This will in turn add the patient itself to the blockchain of the event.
+
+    Parameters
+    ----------
+    event : :obj:`Event`
+        The Blockchain relative to the event that the patient faces.
+    patient : :obj:`Patient`
+        The BlockChain relative to the patient that faces the event.
+    """
+    event.add_block(patient)
+    patient.add_block(event)

@@ -3,10 +3,8 @@ import datetime
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.primitives import serialization
-from cryptography.hazmat.primitives import hashes
-from cryptography.hazmat.primitives.asymmetric import padding
 
-from utils.data_utils import BlockChain, Block
+from blockchain import BlockChain, Block
 
 
 class Patient(BlockChain):
@@ -20,29 +18,25 @@ class Patient(BlockChain):
         self.blocks = [self.get_genesis_block()]
         self.get_keys()
 
-    def add_block(self, kind, data):
+    def add_block(self, event):
         """
         Add a new block to the chain.
+
+        Parameters
+        ----------
+        event : :obj:`Event`
+            The BlockChain relative to the event that the patient faced.
+
+        Returns
+        -------
+
         """
         self.blocks.append(Block(len(self.blocks), player=self.player, name=self.name,
-                                 timestamp=datetime.datetime.utcnow(), kind=kind, data=data,
+                                 timestamp=datetime.datetime.utcnow(), kind=event.event, data=event.name,
                                  previous_hash=self.blocks[len(self.blocks) - 1].hash))
-        # Encrypt blockchain
-        with open(f"../public_keys/{self.name}_public.txt", "rb") as key_file:
-            public_key = serialization.load_pem_public_key(
-                key_file.read(),
-                backend=default_backend()
-            )
-        prova = public_key.encrypt(
-            b"prova",
-            padding.OAEP(
-                mgf=padding.MGF1(algorithm=hashes.SHA256()),
-                algorithm=hashes.SHA256(),
-                label=None
-            )
-        )
+
         # TODO: Prevent from adding prescriptions that are not compatible with previous diseases
-        if kind == "prescription":
+        if event.event == "prescription":
             pass
 
     def get_keys(self):
