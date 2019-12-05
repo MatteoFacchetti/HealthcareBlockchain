@@ -13,3 +13,6 @@
 |:----:|:----------:|----------------------------------------------------------------------------------------------|
 | _1_  | _Sunday_   |  **Matteo** started building the code for the BlockChain. He created the file `blockchain` which contains two classes: the class `Block` and the class `BlockChain`. The file `patient` contains a subclass `Patient` that inherits methods from the class `BlockChain`. |
 | _2_  | _Monday_   |  **Matteo** completed the structure of the blockchain. The blockchain is built on 3 main files: `blockchain`, `event` and `patient`. |
+| _3_  | _Tuesday_  |  **Edoardo** started testing some code about `web3` |
+| _4_  | _Wednesday_|  **Matteo**, **Edoardo** and **He** met prof Petriconi to discuss with him about the model and explore other ideas |
+| _5_  | _Thursday_ |  **Matteo** wrote a summary about what was discussed on Wednesday and uploaded it to git |
