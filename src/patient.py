@@ -16,9 +16,9 @@ class Patient(BlockChain):
         self.name = name
         self.player = "patient"
         self.blocks = [self.get_genesis_block()]
-        self.get_keys()
+        self.get_keys(genesis=True)
 
-    def add_block(self, event):
+    def add_block(self, event, doctor):
         """
         Add a new block to the chain.
 
@@ -26,12 +26,14 @@ class Patient(BlockChain):
         ----------
         event : :obj:`Event`
             The BlockChain relative to the event that the patient faced.
+        doctor : str
+            ID of the doctor who is mining the block.
 
         Returns
         -------
 
         """
-        self.blocks.append(Block(len(self.blocks), player=self.player, name=self.name,
+        self.blocks.append(Block(len(self.blocks), player=self.player, name=self.name, doctor=doctor,
                                  timestamp=datetime.datetime.utcnow(), kind=event.event, data=event.name,
                                  previous_hash=self.blocks[len(self.blocks) - 1].hash))
 
@@ -39,9 +41,16 @@ class Patient(BlockChain):
         if event.event == "prescription":
             pass
 
-    def get_keys(self):
+    def get_keys(self, genesis=False):
         """
         Generate private and public keys of this specific patient and store them in the respective folders.
+
+        Parameters
+        ----------
+        genesis : bool
+            If True, the keys are stored as genesis keys, meaning that they will not be overwritten in future.
+            Genesis keys should be always kept secret and only used by the patient.
+            Doctors should not have access to the genesis keys of the patients.
         """
         # Generate keys
         private_key = rsa.generate_private_key(
@@ -62,3 +71,8 @@ class Patient(BlockChain):
             f.write(private_key)
         with open(f'../public_keys/{self.name}_public.pem', 'wb') as f:
             f.write(public_key)
+        if genesis:
+            with open(f'../private_keys/{self.name}_private_gen.pem', 'wb') as f:
+                f.write(private_key)
+            with open(f'../public_keys/{self.name}_public_gen.pem', 'wb') as f:
+                f.write(public_key)

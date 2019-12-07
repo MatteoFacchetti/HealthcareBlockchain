@@ -18,7 +18,7 @@ class Event(BlockChain):
         if not isinstance(incompatibilities, (list, type(None))):
             raise Exception("`incompatibilities` should be either `list` or `None`")
 
-    def add_block(self, patient):
+    def add_block(self, patient, doctor):
         """
         Add a new block to the chain.
 
@@ -27,6 +27,6 @@ class Event(BlockChain):
         patient : :obj:`Patient`
             The BlockChain relative to the patient that faced this event.
         """
-        self.blocks.append(Block(len(self.blocks), event=self.event, name=self.name, player=self.player,
+        self.blocks.append(Block(len(self.blocks), event=self.event, name=self.name, player=self.player, doctor=doctor,
                                  timestamp=datetime.datetime.utcnow(), patient=patient.name,
                                  previous_hash=self.blocks[len(self.blocks) - 1].hash))

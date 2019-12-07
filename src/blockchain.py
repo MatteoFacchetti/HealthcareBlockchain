@@ -8,7 +8,8 @@ class Block:
     Minimal block containing an index, a timestamp, the data to store and the previous hash.
     """
 
-    def __init__(self, index, name, player, timestamp, previous_hash, data=None, kind=None, patient=None, event=None):
+    def __init__(self, index, name, player, timestamp, previous_hash,
+                 doctor=None, data=None, kind=None, patient=None, event=None):
         self.index = index
         self.player = player
         self.event = event
@@ -16,6 +17,7 @@ class Block:
         self.timestamp = timestamp
         self.kind = kind
         self.patient = patient
+        self.doctor = doctor
         self.data = data
         self.previous_hash = previous_hash
         self.hash = self.hashing()
@@ -30,14 +32,14 @@ class Block:
 
     def summary(self):
         if self.player == "patient":
-            return pd.DataFrame({"Block summary": [self.index, self.name, self.timestamp, self.kind,
+            return pd.DataFrame({"Block summary": [self.index, self.name, self.doctor, self.timestamp, self.kind,
                                                    self.data, self.previous_hash, self.hash]},
-                                index=["Index", "Name", "Timestamp", "Kind", "Data", "Previous hash", "Hash"])
+                                index=["Index", "Name", "Doctor", "Timestamp", "Kind", "Data", "Previous hash", "Hash"])
 
         if self.player == "event":
-            return pd.DataFrame({"Block summary": [self.index, self.name, self.timestamp, self.patient,
+            return pd.DataFrame({"Block summary": [self.index, self.name, self.doctor, self.timestamp, self.patient,
                                                    self.previous_hash, self.hash]},
-                                index=["Index", "Name", "Timestamp", "Patient", "Previous hash", "Hash"])
+                                index=["Index", "Name", "Doctor", "Timestamp", "Patient", "Previous hash", "Hash"])
 
 
 class BlockChain:
@@ -86,17 +88,28 @@ class BlockChain:
                 print(f'Backdating at block {i}.')
         return flag
 
+    def get_block(self, n):
+        """
+        Return block `n` in the chain.
 
-def add_event(event, patient):
-    """
-    Add an event to the patient blockchain. This will in turn add the patient itself to the blockchain of the event.
+        Parameters
+        ----------
+        n : int
+            Index of the block to be returned.
+        """
+        return self.blocks[n].summary()
 
-    Parameters
-    ----------
-    event : :obj:`Event`
-        The Blockchain relative to the event that the patient faces.
-    patient : :obj:`Patient`
-        The BlockChain relative to the patient that faces the event.
-    """
-    event.add_block(patient)
-    patient.add_block(event)
+    def get_chain(self):
+        """
+        Return a pandas DataFrame containing all the blocks of the chain.
+
+        Returns
+        -------
+        chain : pandas.DataFrame
+        """
+        chain = pd.DataFrame()
+        for block in self.blocks:
+            block_T = block.summary().T
+            chain = chain.append(block_T)
+        chain.set_index("Index", inplace=True)
+        return chain
