@@ -16,3 +16,4 @@
 | _3_  | _Tuesday_  |  **Edoardo** started testing some code about `web3` |
 | _4_  | _Wednesday_|  **Matteo**, **Edoardo** and **He** met prof Petriconi to discuss with him about the model and explore other ideas |
 | _5_  | _Thursday_ |  **Matteo** wrote a summary about what was discussed on Wednesday and uploaded it to git |
+| _7_  | _Saturday_ |  **Matteo** created a new class, `Doctor` and updated some functions in the BlockChain code |
