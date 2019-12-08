@@ -3,20 +3,49 @@ import datetime
 from blockchain import BlockChain, Block
 
 
-def count_events(loc):
-    events = []
+def count_player(loc, player):
+    """
+    Count how many BlockChains the `player` has.
+
+    Parameters
+    ----------
+    loc : dict
+        Dictionary associated with the current local symbol table. It must be `locals()`.
+    player : str
+        Either "patient", "event" or "doctor".
+
+    Returns
+    -------
+    len(players) : int
+        Number of BlockChains of that player.
+    players : list
+        List containing all the names of the players.
+    """
+    players = []
     total_locals = loc.copy()
     for local in total_locals:
         try:
-            if loc[local].player == "event":
-                events.append(local)
+            if loc[local].player == player:
+                players.append(local)
         except AttributeError:
             continue
-    return len(events), events
+    return len(players), players
 
 
 def add_incompatibilities(event, incompatibilities, loc):
-    count, events = count_events(loc)
+    """
+    Add a list of `incompatibilities` to a specific `event`.
+
+    Parameters
+    ----------
+    event : :obj:`Event`
+        BlockChain relative to the event that the incompatibilities will be added to.
+    incompatibilities : list
+        List containing the incompatibilities to be added to the Event.
+    loc : dict
+        Dictionary associated with the current local symbol table. It must be `locals()`.
+    """
+    count, events = count_player(loc, "event")
     for incompatibility in incompatibilities:
         for i in events:
             if i == incompatibility:

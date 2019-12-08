@@ -29,14 +29,6 @@ class Doctor(BlockChain):
         patient : :obj:`Patient`
             The BlockChain relative to the patient that faces the event.
         """
-        event.add_block(patient, doctor=self)
         patient.add_block(event, doctor=self)
+        event.add_block(patient, doctor=self)
         self.add_block(event, patient)
-
-
-def get_block(patient, n):
-    return patient.get_block(n)
-
-
-def get_chain(patient):
-    return patient.get_chain()
