@@ -1,3 +1,5 @@
+import datetime
+
 from blockchain import BlockChain, Block
 
 
@@ -11,6 +13,11 @@ class Doctor(BlockChain):
         self.player = "doctor"
         self.blocks = [self.get_genesis_block()]
 
+    def add_block(self, event, patient):
+        self.blocks.append(Block(len(self.blocks), player=self.player, name=self.name, patient=patient.name,
+                                 timestamp=datetime.datetime.utcnow(), kind=event.event, data=event.name,
+                                 previous_hash=self.blocks[len(self.blocks) - 1].hash))
+
     def add_event(self, event, patient):
         """
         Add an event to the patient blockchain. This will in turn add the patient itself to the blockchain of the event.
@@ -22,8 +29,9 @@ class Doctor(BlockChain):
         patient : :obj:`Patient`
             The BlockChain relative to the patient that faces the event.
         """
-        event.add_block(patient, doctor=self.name)
-        patient.add_block(event, doctor=self.name)
+        event.add_block(patient, doctor=self)
+        patient.add_block(event, doctor=self)
+        self.add_block(event, patient)
 
 
 def get_block(patient, n):

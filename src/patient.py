@@ -25,15 +25,15 @@ class Patient(BlockChain):
         Parameters
         ----------
         event : :obj:`Event`
-            The BlockChain relative to the event that the patient faced.
-        doctor : str
-            ID of the doctor who is mining the block.
+            BlockChain relative to the event that the patient faced.
+        doctor : :obj:`Doctor`
+            BlockChain relative to the doctor that adds the event to the chain of the patient.
 
         Returns
         -------
 
         """
-        self.blocks.append(Block(len(self.blocks), player=self.player, name=self.name, doctor=doctor,
+        self.blocks.append(Block(len(self.blocks), player=self.player, name=self.name, doctor=doctor.name,
                                  timestamp=datetime.datetime.utcnow(), kind=event.event, data=event.name,
                                  previous_hash=self.blocks[len(self.blocks) - 1].hash))
 

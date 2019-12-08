@@ -34,12 +34,20 @@ class Block:
         if self.player == "patient":
             return pd.DataFrame({"Block summary": [self.index, self.name, self.doctor, self.timestamp, self.kind,
                                                    self.data, self.previous_hash, self.hash]},
-                                index=["Index", "Name", "Doctor", "Timestamp", "Kind", "Data", "Previous hash", "Hash"])
+                                index=["Index", "Name", "Doctor", "Timestamp", "Event", "Kind",
+                                       "Previous hash", "Hash"])
 
         if self.player == "event":
             return pd.DataFrame({"Block summary": [self.index, self.name, self.doctor, self.timestamp, self.patient,
                                                    self.previous_hash, self.hash]},
-                                index=["Index", "Name", "Doctor", "Timestamp", "Patient", "Previous hash", "Hash"])
+                                index=["Index", "Name", "Doctor", "Timestamp", "Patient",
+                                       "Previous hash", "Hash"])
+
+        if self.player == "doctor":
+            return pd.DataFrame({"Block summary": [self.index, self.name, self.patient, self.timestamp, self.kind,
+                                                   self.data, self.previous_hash, self.hash]},
+                                index=["Index", "Name", "Patient", "Timestamp", "Event", "Kind",
+                                       "Previous hash", "Hash"])
 
 
 class BlockChain:
@@ -72,21 +80,16 @@ class BlockChain:
         * current and previous hashes are correct;
         * there is not any backdating.
         """
-        flag = True
         for i in range(1, len(self.blocks)):
             if self.blocks[i].index != i:
-                flag = False
-                print(f'Wrong block index at block {i}.')
+                return False, f'Wrong block index at block {i}.'
             if self.blocks[i - 1].hash != self.blocks[i].previous_hash:
-                flag = False
-                print(f'Wrong previous hash at block {i}.')
+                return False, f'Wrong previous hash at block {i}.'
             if self.blocks[i].hash != self.blocks[i].hashing():
-                flag = False
-                print(f'Wrong hash at block {i}.')
+                return False, f'Wrong hash at block {i}.'
             if self.blocks[i - 1].timestamp >= self.blocks[i].timestamp:
-                flag = False
-                print(f'Backdating at block {i}.')
-        return flag
+                return False, f'Backdating at block {i}.'
+        return True
 
     def get_block(self, n):
         """
