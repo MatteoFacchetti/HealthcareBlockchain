@@ -27,7 +27,7 @@ class Blockchain(object):
         self.new_block(previous_hash=1, nounce=100)
 
         self.wallett = {}
-        self.Minister = Minister()
+
 
     def new_block(self, nounce, previous_hash=None):
         """
@@ -78,7 +78,7 @@ class Blockchain(object):
         :return: <int> The index of the Block that will hold this transaction
         """
         self.current_transactions.append({
-            'type': 'authentication',
+            'type': 'authorization',
             'sender': sender,
             'recipient': recipient,
             'authorization': authorization,
@@ -98,9 +98,9 @@ class Blockchain(object):
         :param block: <dict> Block
         :return: <str>
         """
-
+        data = [str(transaction) for transaction in block['transactions']]
         # We must make sure that the Dictionary is Ordered, or we'll have inconsistent hashes
-        block_string = json.dumps(block, sort_keys=True).encode()
+        block_string = json.dumps(data, sort_keys=True).encode()
         return hashlib.sha256(block_string).hexdigest()
 
 
@@ -132,20 +132,35 @@ class Blockchain(object):
         guess_hash = hashlib.sha256(guess).hexdigest()
         return guess_hash[:2] == "00"
 
- #   def wallett(self, address):
- #       return {}
-
-    def verify_authentications(self):
+    def verify_authorizations(self, Minister):
         c = 0
+        to_be_deleted = []
         for transaction in self.current_transactions:
-            if transaction['type'] == 'authentication':
+            if transaction['type'] == 'authorization':
                 try:
-                    authentication = transaction['authorization']
-                    self.Minister.public_key.verify(transaction['recipient'], authentication)
-                except:
-                    self.current_transactions.pop(c)
-                c += 1
+                    authorization = transaction['authorization']
+                    public_key = Minister.public_key
+                    public_key = nacl.signing.VerifyKey(public_key, encoder=nacl.encoding.HexEncoder)
+                    public_key.verify(authorization)
 
+                except:
+                    to_be_deleted.append(c)
+
+            else:
+                try:
+                    authorization = transaction['sender'].authorization
+                    public_key = Minister.public_key
+                    public_key = nacl.signing.VerifyKey(public_key, encoder=nacl.encoding.HexEncoder)
+                    public_key.verify(authorization)
+
+                except:
+                    to_be_deleted.append(c)
+            c += 1
+        new_transactions = []
+        for i in range(len(self.current_transactions)):
+            if i not in to_be_deleted:
+                new_transactions.append(self.current_transactions[i])
+        self.current_transactions = new_transactions
 
     def add_wallett(self, block):
         transactions = block['transactions']
@@ -153,33 +168,33 @@ class Blockchain(object):
             if transaction['type'] == 'diagnosis':
                 recipient = transaction['recipient']
                 illness = transaction['illness']
-                if recipient not in self.wallett:
-                    self.wallett[recipient] = [illness]
-                else:
-                    self.wallett[recipient].append(illness)
+                recipient.illnesses.append(illness)
+            if transaction['type'] == 'authorization':
+                recipient = transaction['recipient']
+                authorization = transaction['authorization']
+                recipient.authorization = authorization
 
-    def mine(self):
+
+    def mine(self, Minister):
         last_block = self.last_block
         last_proof = last_block['nounce']
         nounce = self.proof_of_work(last_proof)
 
         # Forge the new Block by adding it to the chain
         previous_hash = self.hash(last_block)
-        self.verify_authentications()
+        self.verify_authorizations(Minister)
         block = self.new_block(nounce, previous_hash)
         self.add_wallett(block)
 
-        #for transaction in block['transactions']:
-        #    transaction['signed_data']
-        #    transaction['signature']
 
-############################# Doctor and Patient ##############################
-
+############################# Doctor, Patient and Minister (acting as nodes) ##############################
+#todo: implementing class Miner and transaction prescription --> every prescription should be matched to incompatble
+# illnesses. The matches should be stored in the node Minister
 class Doctor:
     def __init__(self, name):
         self.name = name
         self.address = self.get_address(name)
-        self.private_key = nacl.signing.SigningKey.generate()
+        self.authorization = None
 
     def get_address(self, name):
         key = hashlib.sha256()
@@ -190,6 +205,7 @@ class Patient:
     def __init__(self, name):
         self.name = name
         self.address = self.get_address(name)
+        self.illnesses = []
 
     def get_address(self, name):
         key = hashlib.sha256()
@@ -209,31 +225,68 @@ class Minister:
         key.update(name.encode('utf-8'))
         return key.hexdigest()
 
-    def generate_autorization(self, doctor):
+    def generate_authorization(self, doctor):
         assert isinstance(doctor, Doctor)
         signed = self.minister_key.sign(bytes(doctor.address, 'utf-8'))
-        return signed.signature
+        return signed
 
 
 
+Minister = Minister()
 
 doctor1 = Doctor('Doctor Muller')
 patient1 = Patient('Mr. Black')
 doctor2 = Doctor('Doctor Johannes')
 patient2 = Patient('Mr. Green')
+patient3 = Patient('Mr. White')
 
-doctors = {doctor1.name: [doctor1.address, doctor1.private_key],
-           doctor2.name: [doctor2.address, doctor2.private_key]}
-
+# Initiate Blockchain
 Health_block = Blockchain()
-Health_block.new_block
-Health_block.new_transaction(doctor1.address, patient1.address, 'Celiachia', 0.20)
-Health_block.new_transaction(doctor2.address, patient2.address, 'Miseales', 0.20)
-Health_block.mine()
-Health_block.new_transaction(doctor1.address, patient2.address, 'Insomnia', 0.20)
-Health_block.new_authorization(Health_block.Minister.address, doctor1.address,
-                               Health_block.Minister.generate_autorization(doctor1), 0.50)
-Health_block.mine()
-print(Health_block.chain)
-print(Health_block.wallett)
-print(type(doctor1.address))
+
+# Doctor2 tries to make diagnosis to different patients
+Health_block.new_transaction(doctor2, patient1, 'Celiachia', 0.20)
+Health_block.new_transaction(doctor2, patient3, 'Misesd', 0.20)
+Health_block.new_transaction(doctor2, patient3, 'Middvds', 0.20)
+print('patient1 illness history: ' + str(patient1.illnesses))
+print('patient2 illness history: ' + str(patient2.illnesses))
+print('patient3 illness history: ' + str(patient3.illnesses))
+Health_block.mine(Minister)
+
+# If we look inside the wallet of each patient we do not see any illness because the doctor2 has no authorization
+# Now let's make an authorization from Minister to doctor1
+
+Health_block.new_authorization(Minister.address, doctor1,
+                               Minister.generate_authorization(doctor1), 0.50)
+Health_block.mine(Minister)
+
+# Now the doctor2 makes a new diagnosis to patient3
+Health_block.new_transaction(doctor1, patient3, 'czia', 0.20)
+
+Health_block.mine(Minister)
+
+#If we look a the history of patient3 we see the illness
+print('--------------------')
+print('patient3 illness history: '+str(patient3.illnesses))
+
+#Now let's print the authorizations of both the doctors
+print('doctor2 authorization: '+str(doctor2.authorization))
+print('doctor1 authorization: '+str(doctor1.authorization))
+
+
+
+
+#print(Health_block.chain)
+
+#auth =  Health_block.wallett[doctor1.address]
+
+#public_key = nacl.signing.VerifyKey(Health_block.Minister.public_key,
+#                                    encoder=nacl.encoding.HexEncoder)
+
+
+#public_key.verify(bytes(list(Health_block.wallett.keys())[2], 'utf-8'), auth)
+
+#a = Minister.generate_authorization(doctor1)
+
+#public_key = Minister.public_key
+#public_key = nacl.signing.VerifyKey(public_key, encoder=nacl.encoding.HexEncoder)
+#public_key.verify(a)

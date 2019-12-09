@@ -18,7 +18,11 @@ public_key = nacl.signing.VerifyKey(public_key_hex,
 
 print(public_key.verify(signed.message, signed.signature))
 
-signed2 = public_key.sign(b"address2")
+try:
+    signed2 = public_key.verify(signed)
+    print('v')
+except:
+    print('ciao')
 verify_key = public_key.verify_key
 verify_key_hex = verify_key.encode(encoder=nacl.encoding.HexEncoder)
 
