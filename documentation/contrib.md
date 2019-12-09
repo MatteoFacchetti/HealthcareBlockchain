@@ -19,6 +19,6 @@
 | _7_  | _Saturday_ |  **Matteo** created a new class, `Doctor` and updated some functions in the BlockChain code |
 | _8_  | _Sunday_   |  **Edoardo** created a new implementation of a unique standard blockchain |
 |      |            |  **Matteo** completed the structure of the first implementation of the blockchain |
-| _8_  | _Sunday_ |  **Francesca** did some research on how `IOTA` works, looked for a way to implement it in Python and detected some useful packages and relevant documentation for this purpose. |
-| _9_  | _Monday_ |  **Francesca** did further research on the concept of secrecy, distinguishing between `backward` and `forward secrecy` in cryptography. She found some useful examples of algorithms allowing for secrecy achievement. |
-
+| _8_  | _Sunday_   |  **Francesca** did some research on how `IOTA` works, looked for a way to implement it in Python and detected some useful packages and relevant documentation for this purpose. |
+| _9_  | _Monday_   |  **Francesca** did further research on the concept of secrecy, distinguishing between `backward` and `forward secrecy` in cryptography. She found some useful examples of algorithms allowing for secrecy achievement. |
+|      |            |  **Matteo** completed the code of the first implementation of the BlockChain and created a Jupyter Notebook that shows a simulation of this technology |
