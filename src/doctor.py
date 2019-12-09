@@ -18,6 +18,9 @@ class Doctor(BlockChain):
                                  timestamp=datetime.datetime.utcnow(), kind=event.event, data=event.name,
                                  previous_hash=self.blocks[len(self.blocks) - 1].hash))
 
+        if not self.verify()[0]:
+            print(f"WARNING: {self.verify()[1]}")
+
     def add_event(self, event, patient):
         """
         Add an event to the patient blockchain. This will in turn add the patient itself to the blockchain of the event.

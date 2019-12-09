@@ -86,6 +86,9 @@ class Event(BlockChain):
                                  doctor=doctor.name, timestamp=datetime.datetime.utcnow(), patient=patient.name,
                                  previous_hash=self.blocks[len(self.blocks) - 1].hash))
 
+        if not self.verify()[0]:
+            print(f"WARNING: {self.verify()[1]}")
+
     def add_incompatibility(self, incompatibility):
         """
         Add an incompatibility.

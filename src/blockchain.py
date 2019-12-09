@@ -38,9 +38,9 @@ class Block:
                                        "Previous hash", "Hash"])
 
         if self.player == "event":
-            return pd.DataFrame({"Block summary": [self.index, self.name, self.doctor, self.timestamp, self.patient,
+            return pd.DataFrame({"Block summary": [self.index, self.name, self.patient, self.doctor, self.timestamp,
                                                    self.previous_hash, self.hash]},
-                                index=["Index", "Name", "Doctor", "Timestamp", "Patient",
+                                index=["Index", "Name", "Patient", "Doctor", "Timestamp",
                                        "Previous hash", "Hash"])
 
         if self.player == "doctor":
@@ -89,7 +89,7 @@ class BlockChain:
                 return False, f'Wrong hash at block {i}.'
             if self.blocks[i - 1].timestamp >= self.blocks[i].timestamp:
                 return False, f'Backdating at block {i}.'
-        return True
+        return True, 'The BlockChain is not corrupted.'
 
     def get_block(self, n):
         """

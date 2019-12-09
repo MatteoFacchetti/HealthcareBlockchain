@@ -1,5 +1,4 @@
 import datetime
-import random
 
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.asymmetric import rsa
@@ -24,8 +23,8 @@ class Patient(BlockChain):
         self.name = name
         self.player = "patient"
         self.blocks = [self.get_genesis_block()]
-        self.generate_keys(genesis=True)
-        self.generate_keys(genesis=False)
+        self.generate_keys(permanent=True)
+        self.generate_keys(permanent=False)
 
     def add_block(self, event, doctor):
         """
@@ -33,9 +32,9 @@ class Patient(BlockChain):
 
         Parameters
         ----------
-        event : :obj:`Event`
+        event : Event
             BlockChain relative to the event that the patient faced.
-        doctor : :obj:`Doctor`
+        doctor : Doctor
             BlockChain relative to the doctor that adds the event to the chain of the patient.
         """
         # Prevent from adding prescriptions that are not compatible with previous diseases
@@ -48,16 +47,19 @@ class Patient(BlockChain):
                                  timestamp=datetime.datetime.utcnow(), kind=event.event, data=event.name,
                                  previous_hash=self.blocks[len(self.blocks) - 1].hash))
 
-    def generate_keys(self, genesis=False):
+        if not self.verify()[0]:
+            print(f"WARNING: {self.verify()[1]}")
+
+    def generate_keys(self, permanent=False):
         """
         Generate private and public keys of this specific patient and store them in the respective folders.
 
         Parameters
         ----------
-        genesis : bool
-            If True, the keys are stored as genesis keys, meaning that they will not be overwritten in future.
-            Genesis keys should be always kept secret and only used by the patient.
-            Doctors should not have access to the genesis keys of the patients.
+        permanent : bool
+            If True, the keys are stored as permanent keys, meaning that they will not be overwritten in future.
+            Permanent keys should be always kept secret and only used by the patient.
+            Doctors should not have access to the permanent private keys of the patients.
         """
         # Generate keys
         private_key = rsa.generate_private_key(
@@ -74,13 +76,13 @@ class Patient(BlockChain):
                                              format=serialization.PublicFormat.SubjectPublicKeyInfo)
 
         # Store keys
-        if not genesis:
-            with open(f'../private_keys/{self.name}_private.pem', 'wb') as f:
+        if not permanent:
+            with open(f'../private_keys/{self.name}_temporary.pem', 'wb') as f:
                 f.write(private_key)
-            with open(f'../public_keys/{self.name}_public.pem', 'wb') as f:
+            with open(f'../public_keys/{self.name}_public_temp.pem', 'wb') as f:
                 f.write(public_key)
         else:
-            with open(f'../private_keys/{self.name}_private_gen.pem', 'wb') as f:
+            with open(f'../private_keys/{self.name}_permanent.pem', 'wb') as f:
                 f.write(private_key)
-            with open(f'../public_keys/{self.name}_public_gen.pem', 'wb') as f:
+            with open(f'../public_keys/{self.name}_public_perm.pem', 'wb') as f:
                 f.write(public_key)
