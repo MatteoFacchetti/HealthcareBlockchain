@@ -22,3 +22,4 @@
 | _8_  | _Sunday_   |  **Francesca** did some research on how `IOTA` works, looked for a way to implement it in Python and detected some useful packages and relevant documentation for this purpose. |
 | _9_  | _Monday_   |  **Francesca** did further research on the concept of secrecy, distinguishing between `backward` and `forward secrecy` in cryptography. She found some useful examples of algorithms allowing for secrecy achievement. |
 |      |            |  **Matteo** completed the code of the first implementation of the BlockChain and created a Jupyter Notebook that shows a simulation of this technology |
+|      |            |  **Edoardo** continued implementation of the standard blockchain and uploaded a document showing how this new blockchain works |  
