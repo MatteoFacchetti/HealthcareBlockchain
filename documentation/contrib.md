@@ -23,3 +23,4 @@
 | _9_  | _Monday_   |  **Francesca** did further research on the concept of secrecy, distinguishing between `backward` and `forward secrecy` in cryptography. She found some useful examples of algorithms allowing for secrecy achievement. |
 |      |            |  **Matteo** completed the code of the first implementation of the BlockChain and created a Jupyter Notebook that shows a simulation of this technology |
 |      |            |  **Edoardo** continued implementation of the standard blockchain and uploaded a document showing how this new blockchain works |  
+| _10_  | _Tuesday_   |  **Edoardo** implemented different kinds of transactions in the standard blockchain |
