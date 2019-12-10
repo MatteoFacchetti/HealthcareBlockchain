@@ -19,7 +19,7 @@ verify_key.verify(signed.message, signed.signature)
 
 
 class Blockchain(object):
-    def __init__(self):
+    def __init__(self, Minister):
         self.current_transactions = []
         self.chain = []
 
@@ -27,6 +27,7 @@ class Blockchain(object):
         self.new_block(previous_hash=1, nounce=100)
 
         self.wallett = {}
+        self.Minister = Minister()
 
 
     def new_block(self, nounce, previous_hash=None):
@@ -69,7 +70,7 @@ class Blockchain(object):
 
         return self.last_block['index'] + 1
 
-    def new_authorization(self, sender, recipient, authorization, fee):
+    def new_authorization(self, recipient, fee):
         """
         Creates a new transaction to go into the next mined Block
         :param sender: <str> Address of the Sender
@@ -79,9 +80,21 @@ class Blockchain(object):
         """
         self.current_transactions.append({
             'type': 'authorization',
+            'sender': self.Minister,
+            'recipient': recipient,
+            'authorization': self.Minister.generate_authorization(recipient),
+            'fee': fee
+        })
+
+        return self.last_block['index'] + 1
+
+    def new_prescription(self, sender, recipient, prescription, fee):
+
+        self.current_transactions.append({
+            'type': 'prescription',
             'sender': sender,
             'recipient': recipient,
-            'authorization': authorization,
+            'prescription': prescription,
             'fee': fee
         })
 
@@ -132,14 +145,14 @@ class Blockchain(object):
         guess_hash = hashlib.sha256(guess).hexdigest()
         return guess_hash[:2] == "00"
 
-    def verify_authorizations(self, Minister):
+    def verify_authorizations(self):
         c = 0
         to_be_deleted = []
         for transaction in self.current_transactions:
             if transaction['type'] == 'authorization':
                 try:
                     authorization = transaction['authorization']
-                    public_key = Minister.public_key
+                    public_key = self.Minister.public_key
                     public_key = nacl.signing.VerifyKey(public_key, encoder=nacl.encoding.HexEncoder)
                     public_key.verify(authorization)
 
@@ -149,12 +162,24 @@ class Blockchain(object):
             else:
                 try:
                     authorization = transaction['sender'].authorization
-                    public_key = Minister.public_key
+                    public_key = self.Minister.public_key
                     public_key = nacl.signing.VerifyKey(public_key, encoder=nacl.encoding.HexEncoder)
                     public_key.verify(authorization)
 
                 except:
                     to_be_deleted.append(c)
+                    print('Not valid Doctor authorization')
+                if transaction['type'] == 'prescription':
+                    try:
+                        incompatibilites = self.Minister.incompatibilities
+                        if transaction['prescription'] in incompatibilites.keys():
+                            prescription = transaction['prescription']
+                            illnesses_inc = set(self.Minister.incompatibilities[prescription])
+                            illnesses_patient = set(transaction['recipient'].illnesses)
+                            assert len(illnesses_inc.intersection(illnesses_patient)) == 0
+                    except:
+                        to_be_deleted.append(c)
+                        print('Incompatibility of one prescription with the history of the patient')
             c += 1
         new_transactions = []
         for i in range(len(self.current_transactions)):
@@ -174,22 +199,20 @@ class Blockchain(object):
                 authorization = transaction['authorization']
                 recipient.authorization = authorization
 
-
-    def mine(self, Minister):
+    def mine(self):
         last_block = self.last_block
         last_proof = last_block['nounce']
         nounce = self.proof_of_work(last_proof)
 
         # Forge the new Block by adding it to the chain
         previous_hash = self.hash(last_block)
-        self.verify_authorizations(Minister)
+        self.verify_authorizations()
         block = self.new_block(nounce, previous_hash)
         self.add_wallett(block)
 
 
 ############################# Doctor, Patient and Minister (acting as nodes) ##############################
-#todo: implementing class Miner and transaction prescription --> every prescription should be matched to incompatble
-# illnesses. The matches should be stored in the node Minister
+#todo: implementing class Miner
 class Doctor:
     def __init__(self, name):
         self.name = name
@@ -219,6 +242,9 @@ class Minister:
         self.minister_key = nacl.signing.SigningKey.generate()
         public_key = self.minister_key.verify_key
         self.public_key = public_key.encode(encoder=nacl.encoding.HexEncoder)
+        self.incompatibilities = {'medicine1': ['illness1', 'illness2'],
+                                  'medicine2': ['illness1'],
+                                  'medicine3': ['illness2', 'illness3']}
 
     def get_address(self, name):
         key = hashlib.sha256()
@@ -232,7 +258,7 @@ class Minister:
 
 
 
-Minister = Minister()
+
 
 doctor1 = Doctor('Doctor Muller')
 patient1 = Patient('Mr. Black')
@@ -241,52 +267,54 @@ patient2 = Patient('Mr. Green')
 patient3 = Patient('Mr. White')
 
 # Initiate Blockchain
-Health_block = Blockchain()
+Health_block = Blockchain(Minister)
+
+print('--------------------diagnosis without authorization-------------------')
 
 # Doctor2 tries to make diagnosis to different patients
-Health_block.new_transaction(doctor2, patient1, 'Celiachia', 0.20)
-Health_block.new_transaction(doctor2, patient3, 'Misesd', 0.20)
-Health_block.new_transaction(doctor2, patient3, 'Middvds', 0.20)
+Health_block.new_transaction(doctor2, patient1, 'illness2', 0.20)
+Health_block.new_transaction(doctor2, patient3, 'illness3', 0.20)
+Health_block.new_transaction(doctor2, patient3, 'illness1', 0.20)
 print('patient1 illness history: ' + str(patient1.illnesses))
 print('patient2 illness history: ' + str(patient2.illnesses))
 print('patient3 illness history: ' + str(patient3.illnesses))
-Health_block.mine(Minister)
+Health_block.mine()
 
 # If we look inside the wallet of each patient we do not see any illness because the doctor2 has no authorization
 # Now let's make an authorization from Minister to doctor1
-
-Health_block.new_authorization(Minister.address, doctor1,
-                               Minister.generate_authorization(doctor1), 0.50)
-Health_block.mine(Minister)
+print('--------------------diagnosis with authorization-------------------')
+Health_block.new_authorization(doctor1, 0.50)
+Health_block.mine()
 
 # Now the doctor2 makes a new diagnosis to patient3
-Health_block.new_transaction(doctor1, patient3, 'czia', 0.20)
+Health_block.new_transaction(doctor1, patient3, 'illness1', 0.20)
 
-Health_block.mine(Minister)
+Health_block.mine()
 
-#If we look a the history of patient3 we see the illness
-print('--------------------')
+
+# If we look a the history of patient3 we see the illness
 print('patient3 illness history: '+str(patient3.illnesses))
 
-#Now let's print the authorizations of both the doctors
+# Now let's print the authorizations of both the doctors
 print('doctor2 authorization: '+str(doctor2.authorization))
 print('doctor1 authorization: '+str(doctor1.authorization))
 
+print('--------------------prescription-------------------')
+# Let's do a prescription
+Health_block.new_prescription(doctor1, patient3, 'medicine3', 0.20)
+Health_block.mine()
 
+# Let's try to do a prescription incompatible with the illnesses of patient3
+Health_block.new_prescription(doctor1, patient3, 'medicine1', 0.20)
+Health_block.mine()
 
+print('--------------------faake authorization-------------------')
+# Now let's try to create a fake authorization.
+private_key_random = nacl.signing.SigningKey.generate()
+signed = private_key_random.sign(bytes(doctor2.address, 'utf-8'))
+doctor2.authorization = signed
 
-#print(Health_block.chain)
-
-#auth =  Health_block.wallett[doctor1.address]
-
-#public_key = nacl.signing.VerifyKey(Health_block.Minister.public_key,
-#                                    encoder=nacl.encoding.HexEncoder)
-
-
-#public_key.verify(bytes(list(Health_block.wallett.keys())[2], 'utf-8'), auth)
-
-#a = Minister.generate_authorization(doctor1)
-
-#public_key = Minister.public_key
-#public_key = nacl.signing.VerifyKey(public_key, encoder=nacl.encoding.HexEncoder)
-#public_key.verify(a)
+print(doctor2.authorization)
+Health_block.new_transaction(doctor2, patient1, 'illness2', 0.20)
+Health_block.mine()
+print(Health_block.chain)
