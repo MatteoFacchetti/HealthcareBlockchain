@@ -24,3 +24,5 @@
 |      |            |  **Matteo** completed the code of the first implementation of the BlockChain and created a Jupyter Notebook that shows a simulation of this technology |
 |      |            |  **Edoardo** continued implementation of the standard blockchain and uploaded a document showing how this new blockchain works |  
 | _10_  | _Tuesday_   |  **Edoardo** implemented different kinds of transactions in the standard blockchain |
+| _11_  | _Wednesday_   |  **Francesca** looked for useful papers on how blockchains can improve bureaucracy-related issues in the healthcare system so as to verify if the blockchain prototype is efficiently addressing these needs. |
+| _12_  | _Thursday_   |  **Francesca** did some more research and started contextualising the blockchain prototype by writing down what she found. |
