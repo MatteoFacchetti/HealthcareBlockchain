@@ -59,15 +59,13 @@ class Patient:
 
 
 class Minister:
-    def __init__(self):
+    def __init__(self, incompatibilities):
         self.name = 'Minister of Health'
         self.address = self.get_address(self.name)
         self.minister_key = nacl.signing.SigningKey.generate()
         public_key = self.minister_key.verify_key
         self.public_key = public_key.encode(encoder=nacl.encoding.HexEncoder)
-        self.incompatibilities = {'medicine1': ['illness1', 'illness2'],
-                                  'medicine2': ['illness1'],
-                                  'medicine3': ['illness2', 'illness3']}
+        self.incompatibilities = incompatibilities
 
     def get_address(self, name):
         key = hashlib.sha256()

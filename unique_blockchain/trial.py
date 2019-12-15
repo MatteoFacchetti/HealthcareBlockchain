@@ -4,7 +4,9 @@ import nacl.signing
 
 
 # Initiate Blockchain
-Health_block = Blockchain(Minister)
+Health_block = Blockchain(Minister, incompatibilities={'medicine1': ['illness1', 'illness2'],
+                                  'medicine2': ['illness1'],
+                                  'medicine3': ['illness2', 'illness3']})
 
 miner1 = Miner(Health_block)
 miner2 = Miner(Health_block)

@@ -4,19 +4,19 @@ from time import time
 import nacl.encoding
 import nacl.signing
 import numpy as np
-from unique_blockchain.agents import Patient
+from agents import Patient
 from cryptography.hazmat.primitives import serialization
 
 
 class Blockchain(object):
-    def __init__(self, Minister):
+    def __init__(self, minister, incompatibilities):
         self.current_transactions = []
         self.chain = []
 
         # Create the genesis block
         self.new_block(previous_hash=1, nounce=100)
 
-        self.Minister = Minister()
+        self.Minister = minister(incompatibilities)
 
     def new_block(self, nounce, previous_hash=None):
         """
