@@ -19,6 +19,17 @@ class Blockchain(object):
         self.Minister = Minister()
 
     def new_block(self, nounce, previous_hash=None):
+        """
+
+        Parameters
+        ----------
+        nounce: the nounce found by the miner
+        previous_hash: the previous block hashed
+
+        Returns
+        -------
+
+        """
         block = {
             'index': len(self.chain) + 1,
             'timestamp': time(),
@@ -34,6 +45,19 @@ class Blockchain(object):
         return block
 
     def new_diagnosis(self, sender, recipient, illness, fee):
+        """
+        Appends a transaction to the current transactions
+        Parameters
+        ----------
+        sender: an object Doctor
+        recipient: an object Patient
+        illness: the illness diagnosed by the doctor
+        fee: the fee value for inserting the transaction in the block
+
+        Returns
+        -------
+        The index of the current block
+        """
         self.current_transactions.append({
             'type': 'diagnosis',
             'sender': sender,
@@ -45,6 +69,17 @@ class Blockchain(object):
         return self.last_block['index'] + 1
 
     def new_authorization(self, recipient, fee):
+        """
+
+        Parameters
+        ----------
+        recipient: an object Doctor
+        fee: the fee value for inserting the transaction in the block
+
+        Returns
+        -------
+        The index of the current block
+        """
         self.current_transactions.append({
             'type': 'authorization',
             'sender': self.Minister,
@@ -56,6 +91,19 @@ class Blockchain(object):
         return self.last_block['index'] + 1
 
     def new_prescription(self, sender, recipient, prescription, fee):
+        """
+
+        Parameters
+        ----------
+        sender: an object Doctor
+        recipient: an object Patient
+        prescription: the medicine given by the doctor to the patient
+        fee: the fee value for inserting the transaction in the block
+
+        Returns
+        -------
+        The index of the current block
+        """
         self.current_transactions.append({
             'type': 'prescription',
             'sender': sender,
@@ -72,12 +120,32 @@ class Blockchain(object):
 
     @staticmethod
     def hash(block):
+        """
+        Hashes the data contained in a block
+        Parameters
+        ----------
+        block: the dictionary representing the block
+
+        Returns
+        -------
+        The resulting hash
+        """
         data = [str(transaction) for transaction in block['transactions']]
         # We must make sure that the Dictionary is Ordered, or we'll have inconsistent hashes
         block_string = json.dumps(data, sort_keys=True).encode()
         return hashlib.sha256(block_string).hexdigest()
 
     def proof_of_work(self, last_proof):
+        """
+        Performs the proof of work
+        Parameters
+        ----------
+        last_proof: nounce of the last block
+
+        Returns
+        -------
+        The nounce solving the proof of work
+        """
         nounce = 0
         while self.valid_proof(last_proof, nounce) is False:
             nounce += 1
@@ -91,6 +159,13 @@ class Blockchain(object):
         return guess_hash[:2] == "00"
 
     def verify_authorizations(self):
+        """
+        Verifies that doctor has a valid authorization to make diagnoses or prescriptions.
+        If a transaction is invalid is removed by the list of current transactions.
+        Returns
+        -------
+
+        """
         c = 0
         to_be_deleted = []
         for transaction in self.current_transactions:
@@ -133,6 +208,17 @@ class Blockchain(object):
         self.current_transactions = new_transactions
 
     def add_info(self, block):
+        """
+        Adds related info to the recipients of the transactions.
+        Authorization to the doctor and illness to the patient.
+        Parameters
+        ----------
+        block: \
+
+        Returns
+        -------
+
+        """
         transactions = block['transactions']
         for transaction in transactions:
             if transaction['type'] == 'diagnosis':
@@ -145,6 +231,18 @@ class Blockchain(object):
                 recipient.authorization = authorization
 
     def mine(self, miners):
+        """
+        Let each miner specified in the parameter "miners" perform the proof of work.
+        As soon as a block is found, the chain is broadcasted to all the miners and the fees are
+        appended only to the miner who solved the proof of work in the shortest time.
+        Parameters
+        ----------
+        miners: list of objects "Miner"
+
+        Returns
+        -------
+
+        """
         times = []
         nounces = []
         for miner in miners:
@@ -201,6 +299,17 @@ class Blockchain(object):
             raise PermissionError("You do not have access to the BlockChain of this patient.")
 
     def get_patient_history(self, patient, private_key):
+        """
+        Gets the list of illnesses of the patient specified using a private key specified by the patient.
+        Parameters
+        ----------
+        patient: an object "Patient"
+        private_key: the private key specified by the patient
+
+        Returns
+        -------
+
+        """
         assert isinstance(patient, Patient)
         try:
             self.check_keys(patient, private_key)

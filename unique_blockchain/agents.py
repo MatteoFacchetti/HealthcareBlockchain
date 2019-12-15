@@ -32,13 +32,10 @@ class Patient:
 
     def generate_keys(self):
         """
-        Generate private and public keys of this specific patient and store them in the respective folders.
-        Parameters
-        ----------
-        permanent : bool
-            If True, the keys are stored as permanent keys, meaning that they will not be overwritten in future.
-            Permanent keys should be always kept secret and only used by the patient.
-            Doctors should not have access to the permanent private keys of the patients.
+        Generates a private and the related public key
+        Returns
+        -------
+        The private and the public key
         """
         # Generate keys
         private_key = rsa.generate_private_key(
@@ -55,7 +52,7 @@ class Patient:
         Refresh temporary keys of the patient.
         Parameters
         ----------
-        patient : Patient
+        patient : an object Patient
         """
         self.private_key, self.public_key = self.generate_keys()
         print("Temporary keys have been refreshed. Old keys have been destroyed and will not work.")
@@ -78,6 +75,17 @@ class Minister:
         return key.hexdigest()
 
     def generate_authorization(self, doctor):
+        """
+        Generates an authorization for a specified Doctor signing the doctor's address
+        with the private key of the Minister
+        Parameters
+        ----------
+        doctor
+
+        Returns
+        -------
+        The address signed
+        """
         assert isinstance(doctor, Doctor)
         signed = self.minister_key.sign(bytes(doctor.address, 'utf-8'))
         return signed
@@ -90,6 +98,12 @@ class Miner:
         self.blockchain = Health_block
 
     def mine_block(self):
+        """
+        Performs the proof of work and computes the time to do that
+        Returns
+        -------
+        The nounce and the related time to find it
+        """
         start = timeit.timeit()
         last_block = self.blockchain.last_block
         last_proof = last_block['nounce']
