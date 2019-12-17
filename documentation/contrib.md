@@ -26,3 +26,5 @@
 | _10_  | _Tuesday_   |  **Edoardo** implemented different kinds of transactions in the standard blockchain |
 | _11_  | _Wednesday_   |  **Francesca** looked for useful papers on how blockchains can improve bureaucracy-related issues in the healthcare system so as to verify if the blockchain prototype is efficiently addressing these needs. |
 | _12_  | _Thursday_   |  **Francesca** did some more research and started contextualising the blockchain prototype by writing down what she found. |
+| _13_  | _Friday_   |  **Edoardo** finished merging both implementations |
+| _14_  | _Saturday_   |  **Edoardo** wrote a report of the final blockchain to update the other team members |
